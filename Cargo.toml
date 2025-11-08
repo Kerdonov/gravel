@@ -1,0 +1,8 @@
+[workspace]
+members = [
+  "stdsrv",
+  "cracked_md",
+  "fstools",
+]
+
+resolver = "3"

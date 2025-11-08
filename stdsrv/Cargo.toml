@@ -1,0 +1,9 @@
+[package]
+name = "stdsrv"
+version = "0.1.0"
+edition = "2024"
+
+# local dependencies
+[dependencies]
+cracked_md = { path = "../cracked_md" }
+fstools = { path = "../fstools" }
