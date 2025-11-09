@@ -1,0 +1,22 @@
+name: Test the running changes
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test
+    runs-on: rust-latest
+
+    steps:
+      - run: apt-get update -y && apt-get install nodejs -y
+      - uses: actions/checkout@v4
+      - run: cargo build --verbose
+      - run: cargo clippy -- -D warnings
+      - run: cargo test --verbose
