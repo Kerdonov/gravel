@@ -3,5 +3,3 @@ web/
 target/
 
 result
-Cargo.lock
-flake.lock
