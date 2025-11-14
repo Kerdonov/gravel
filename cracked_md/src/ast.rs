@@ -171,8 +171,11 @@ mod convert_md_to_html_test {
     #[test]
     fn single_header() {
         let md = "# Header 1";
-
-        let html = parse(md).to_html();
+        let ast = match parse(md) {
+            Ok(a) => a,
+            Err(e) => panic!("{}", e),
+        };
+        let html = ast.to_html();
 
         assert_eq!(
             html,
@@ -181,14 +184,43 @@ mod convert_md_to_html_test {
     }
 
     #[test]
+    fn single_header_wrong_format() {
+        let md = "#Whoops";
+        let ast = parse(md);
+
+        assert!(ast.is_err());
+    }
+
+    #[test]
     fn nested_bold_headers_and_nested_code_paragraph() {
         let md = "# *Bold* header 1\n## Header 2\nrun `sudo rm -rf /` on your computer";
-
-        let html = parse(md).to_html();
+        let ast = match parse(md) {
+            Ok(a) => a,
+            Err(e) => panic!("{}", e),
+        };
+        let html = ast.to_html();
 
         assert_eq!(
             html,
             "<!doctype html><html lang=en><head></head><body><h1><b>Bold</b> header 1</h1><h2>Header 2</h2><p>run <code>sudo rm -rf /</code> on your computer</p></body></html>"
         );
+    }
+}
+
+#[cfg(test)]
+mod parse_real_md {
+    use std::fs;
+
+    use crate::parser::parse;
+
+    #[test]
+    fn go() {
+        let file = "./test.md";
+        let md = fs::read_to_string(file).expect("reading ./test.md failed");
+
+        let _ast = match parse(&md).map_err(|e| e.set_file(file.into())) {
+            Ok(a) => a,
+            Err(e) => panic!("{}", e),
+        };
     }
 }

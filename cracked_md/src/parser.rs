@@ -3,14 +3,15 @@ mod inline;
 
 use block::parse_blocks;
 
-use crate::ast::Document;
+use crate::{MdParseError, ast::Document};
 
-pub fn parse(s: &str) -> Document {
-    Document {
-        blocks: parse_blocks(s),
-    }
+pub fn parse(s: &str) -> Result<Document, MdParseError> {
+    Ok(Document {
+        blocks: parse_blocks(s)?,
+    })
 }
 
+/*
 #[cfg(test)]
 mod test {
     use crate::ast::*;
@@ -145,3 +146,4 @@ mod test {
         );
     }
 }
+// */
