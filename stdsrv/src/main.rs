@@ -1,6 +1,4 @@
-//! This is my very monolithic file server with zero dependencies (other than rust
-//! stdlib).
-//!
+//! A simple web server with 0 dependencies (other than Rust's stdlib).
 //! Documentation is a work in progress, go see my webpage at [jlux.dev](https://jlux.dev).
 
 use std::{
@@ -32,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if args.generate {
         match generate(&args.indir, &args.outdir, args.force) {
-            Ok(_) => log!(
+            Ok(()) => log!(
                 Level::Info,
                 "HTML generation from `{}` to `{}` successful",
                 args.indir.display(),
@@ -50,7 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 log!(Level::Error, "HTML generation failed with error: {}", e,);
                 process::exit(1);
             }
-        };
+        }
     }
 
     let listener = TcpListener::bind(&args.addr)?;
@@ -59,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                let outdir = args.outdir.to_owned();
+                let outdir = args.outdir.clone();
                 std::thread::spawn(move || {
                     log!(Level::Debug, "TcpStream handler spawned");
                     let mut reader = BufReader::new(&stream);

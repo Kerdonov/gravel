@@ -146,7 +146,7 @@ impl Display for HttpResponse {
             write!(
                 f,
                 "{}\r\n",
-                String::from_utf8(s.to_vec()).unwrap_or("<binary data>".to_string())
+                String::from_utf8(s.clone()).unwrap_or("<binary data>".to_string())
             )?;
         }
         Ok(())

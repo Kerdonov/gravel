@@ -36,11 +36,12 @@ pub fn parse_inlines(input: &str) -> Result<Vec<Inline>, MdParseError> {
             _ => {
                 let mut text = String::new();
                 text.push(c);
-                while let Some(nc) = chars.next() {
+                while let Some(&nc) = chars.peek() {
                     if matches!(nc, '*' | '_' | '`' | '[') {
                         break;
                     }
-                    text.push(nc);
+                    let c = chars.next().ok_or(MdParseError::new("a character", ""))?;
+                    text.push(c);
                 }
                 inlines.push(Inline::Text(text));
             }
@@ -55,11 +56,76 @@ fn collect_until<I: Iterator<Item = char>>(
     end: char,
 ) -> Result<String, MdParseError> {
     let mut s = String::new();
-    while let Some(c) = chars.next() {
+    for c in chars.by_ref() {
         if c == end {
             return Ok(s);
         }
         s.push(c);
     }
     Err(MdParseError::new(end, ""))
+}
+
+#[cfg(test)]
+mod test {
+    use crate::ast::Inline;
+
+    use super::parse_inlines;
+
+    #[test]
+    fn bold_text() {
+        let md = "*abc*";
+        let inl = parse_inlines(md).unwrap();
+
+        assert_eq!(
+            inl,
+            vec![Inline::Bold(vec![Inline::Text("abc".to_string())])]
+        );
+    }
+
+    #[test]
+    fn italic_text() {
+        let md = "_abc_";
+        let inl = parse_inlines(md).unwrap();
+
+        assert_eq!(
+            inl,
+            vec![Inline::Italic(vec![Inline::Text("abc".to_string())])]
+        );
+    }
+
+    #[test]
+    fn bold_italic_text() {
+        let md = "*_abc_*";
+        let inl = parse_inlines(md).unwrap();
+
+        assert_eq!(
+            inl,
+            vec![Inline::Bold(vec![Inline::Italic(vec![Inline::Text(
+                "abc".to_string()
+            )])])]
+        );
+    }
+
+    #[test]
+    fn code() {
+        let md = "`sudo rm -rf /`";
+        let inl = parse_inlines(md).unwrap();
+
+        assert_eq!(inl, vec![Inline::Code("sudo rm -rf /".to_string())]);
+    }
+
+    #[test]
+    fn text_and_code() {
+        let md = "run `sudo rm -rf /` on your computer";
+        let inl = parse_inlines(md).unwrap();
+
+        assert_eq!(
+            inl,
+            vec![
+                Inline::Text("run ".to_string()),
+                Inline::Code("sudo rm -rf /".to_string()),
+                Inline::Text(" on your computer".to_string())
+            ]
+        );
+    }
 }

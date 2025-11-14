@@ -1,36 +1,38 @@
+//! Wrapper type of a `HashMap` to contain HTTP headers and format them correctly.
+
 use std::{collections::HashMap, fmt::Display};
 
 #[derive(Debug)]
 pub struct HttpHeaders {
-    _inner: HashMap<String, String>,
+    inner: HashMap<String, String>,
 }
 
 impl HttpHeaders {
     pub fn new() -> Self {
         HttpHeaders {
-            _inner: HashMap::new(),
+            inner: HashMap::new(),
         }
     }
 
     pub fn add(&mut self, k: &str, v: &str) {
-        self._inner.insert(k.to_string(), v.to_string());
+        self.inner.insert(k.to_string(), v.to_string());
     }
 
     #[cfg(test)]
     pub fn get(&self, k: &str) -> Option<&String> {
-        self._inner.get(k)
+        self.inner.get(k)
     }
 
     #[cfg(test)]
     pub fn len(&self) -> usize {
-        self._inner.len()
+        self.inner.len()
     }
 }
 
 impl Display for HttpHeaders {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (k, v) in self._inner.iter() {
-            write!(f, "{}: {}\r\n", k, v)?;
+        for (k, v) in &self.inner {
+            write!(f, "{k}: {v}\r\n")?;
         }
         Ok(())
     }

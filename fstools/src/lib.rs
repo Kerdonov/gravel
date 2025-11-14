@@ -2,13 +2,14 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
-/// Recursively crawl through the directory given and aggregate all file handles to a HashMap with
+/// Recursively crawl through the directory given and aggregate all file handles to a `HashMap` with
 /// their respective (relative) paths as keys.
+#[must_use]
 pub fn crawl_fs(root: &PathBuf) -> HashSet<PathBuf> {
     crawl_fs_rec(root, root)
 }
 
-/// Helper function: Recursively crawl through the directory given and aggregate all file handles to a HashMap with
+/// Helper function: Recursively crawl through the directory given and aggregate all file handles to a `HashMap` with
 /// their respective (relative) paths as keys.
 fn crawl_fs_rec(root: &PathBuf, path: &PathBuf) -> HashSet<PathBuf> {
     let mut subdirs = Vec::with_capacity(100);

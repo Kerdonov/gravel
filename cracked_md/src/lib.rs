@@ -1,4 +1,8 @@
+//! A "Markdown" parser and HTML generator. Part of a static site generator `marksmith-rs`.
+//! Not following any standards, only vibes.
+
 #![deny(unused_imports)]
+#![allow(clippy::needless_pass_by_value)]
 
 use fstools::crawl_fs;
 use parser::parse;
@@ -57,6 +61,7 @@ impl MdParseError {
     }
     */
 
+    #[must_use]
     pub fn set_line(self, line: usize) -> Self {
         Self {
             file: self.file,
@@ -67,6 +72,7 @@ impl MdParseError {
         }
     }
 
+    #[must_use]
     pub fn set_file(self, file: PathBuf) -> Self {
         Self {
             file: Some(file),
@@ -98,7 +104,9 @@ impl std::error::Error for MdParseError {}
 
 #[derive(Debug)]
 pub enum Error {
+    InDirIsNotDir,
     OutDirIsNotEmpty,
+    OutDirIsNotDir,
     OutDirFileDeleteNotAllowed,
     OutDirDirectoryInPlaceOfFile,
     FileRead,
@@ -125,7 +133,18 @@ impl std::error::Error for Error {}
 
 type Result<T> = std::result::Result<T, crate::Error>;
 
+/// Takes two directories and a force flag as parameters, generates html files to the outdir in the
+/// same directory structure as the md files in indir.
+///
+/// # Errors
+/// Anything wrong with reading files from the directories or parsing the files.
 pub fn generate(indir: &PathBuf, outdir: &PathBuf, force: bool) -> Result<()> {
+    if !indir.is_dir() {
+        Err(Error::InDirIsNotDir)?;
+    }
+    if !outdir.is_dir() {
+        Err(Error::OutDirIsNotDir)?;
+    }
     let files = crawl_fs(indir);
 
     for path in files {

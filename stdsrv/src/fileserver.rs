@@ -1,10 +1,11 @@
-//! FileServer
+//! A simple server implementation that just responds with the contents of the file requested in
+//! the provided directory.
 
 use std::fs;
 use std::path::PathBuf;
 
 use crate::{
-    error::*,
+    error::{Error, ErrorKind, Result},
     request::{HttpMethod, HttpRequest},
     responder::Responder,
     response::{HttpResponse, HttpStatus},
@@ -51,7 +52,6 @@ impl Responder for FileServer {
         let content_type = match req.path.extension() {
             Some(s) => match s.as_encoded_bytes() {
                 b"html" | b"htm" => "text/html",
-                b"txt" => "text/plain",
                 b"css" => "text/css",
                 b"js" => "text/javascript",
                 b"pdf" => "application/pdf",

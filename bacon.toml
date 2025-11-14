@@ -54,7 +54,9 @@ need_stdout = false
 [jobs.test]
 command = [
     "cargo", "nextest", "run",
-    "--hide-progress-bar", "--failure-output", "final"
+    "--hide-progress-bar",
+    "--failure-output", "final",
+    "--no-fail-fast"
 ]
 need_stdout = true
 analyzer = "nextest"
@@ -62,7 +64,8 @@ analyzer = "nextest"
 [jobs.nextest]
 command = [
     "cargo", "nextest", "run",
-    "--hide-progress-bar", "--failure-output", "final"
+    "--hide-progress-bar",
+    "--failure-output", "final",
 ]
 need_stdout = true
 analyzer = "nextest"

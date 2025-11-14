@@ -65,7 +65,7 @@ pub trait ParsePattern: Iterator + Clone {
 }
 */
 
-pub trait Parse: Iterator {
+pub trait Parse: Iterator + Clone {
     fn follows(&mut self, token: char) -> bool;
 
     fn parse_token(&mut self, token: char) -> bool {
@@ -77,23 +77,32 @@ pub trait Parse: Iterator {
         }
     }
 
-    fn parse_str(&mut self, _tokens: &str) -> bool {
-        todo!()
+    fn parse_str(&mut self, tokens: &str) -> bool {
+        let mut cloned = self.clone();
+
+        for pat_token in tokens.chars() {
+            if cloned.follows(pat_token) {
+                cloned.next();
+            } else {
+                return false;
+            }
+        }
+
+        *self = cloned;
+
+        true
     }
 }
 
 impl Parse for std::iter::Peekable<std::str::Chars<'_>> {
     fn follows(&mut self, token: char) -> bool {
-        self.peek().map(|c| c == &token).unwrap_or(false)
+        self.peek().is_some_and(|c| c == &token)
     }
 }
 
 impl Parse for std::iter::Peekable<std::iter::Enumerate<std::str::Chars<'_>>> {
     fn follows(&mut self, token: char) -> bool {
-        self.peekable()
-            .peek()
-            .map(|&(_i, c)| c == token)
-            .unwrap_or(false)
+        self.peek().is_some_and(|&(_i, c)| c == token)
     }
 }
 
@@ -107,5 +116,61 @@ mod test {
 
         assert!(c.follows('a'));
         assert!(c.follows('a'));
+    }
+
+    #[test]
+    fn chars_parse_tokens() {
+        let mut c = "abcdef".chars().peekable();
+
+        assert!(c.parse_token('a'));
+        assert!(c.parse_token('b'));
+    }
+
+    #[test]
+    fn chars_parse_str() {
+        let mut c = "abcdef".chars().peekable();
+
+        assert!(c.parse_str("abc"));
+        assert!(c.parse_str("def"));
+    }
+
+    #[test]
+    fn enumerate_parse_follows_double() {
+        let mut c = "abc".chars().enumerate().peekable();
+
+        assert!(c.follows('a'));
+        assert!(c.follows('a'));
+    }
+
+    #[test]
+    fn enumerate_parse_tokens() {
+        let mut c = "abcdef".chars().enumerate().peekable();
+
+        assert!(c.parse_token('a'));
+        assert!(c.parse_token('b'));
+    }
+
+    #[test]
+    fn enumerate_parse_str() {
+        let mut c = "abcdef".chars().enumerate().peekable();
+
+        assert!(c.parse_str("abc"));
+        assert!(c.parse_str("def"));
+    }
+
+    #[test]
+    fn enumerate_parse_token_failed_not_consume() {
+        let mut c = "abc".chars().enumerate().peekable();
+
+        assert!(!c.parse_token('b'));
+        assert!(c.parse_token('a'));
+    }
+
+    #[test]
+    fn enumerate_parse_str_failed_not_consume() {
+        let mut c = "abcdef".chars().enumerate().peekable();
+
+        assert!(!c.parse_str("def"));
+        assert!(c.parse_str("abc"));
     }
 }

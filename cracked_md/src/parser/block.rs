@@ -10,6 +10,11 @@ pub fn parse_blocks(input: &str) -> Result<Vec<Block>, MdParseError> {
     while let Some((i, line)) = lines.next() {
         let mut line_chars = line.chars().peekable();
 
+        // empty line
+        if line_chars.peek().is_none() {
+            continue;
+        }
+
         // header
         let mut heading_level = 0;
         while line_chars.parse_token('#') {
@@ -53,6 +58,7 @@ pub fn parse_blocks(input: &str) -> Result<Vec<Block>, MdParseError> {
             };
             let mut code = String::new();
 
+            let mut successful = false;
             for (j, line) in lines.by_ref() {
                 let mut code_line_chars = line.chars().peekable();
                 // code block end
@@ -63,23 +69,31 @@ pub fn parse_blocks(input: &str) -> Result<Vec<Block>, MdParseError> {
                             language: lang,
                             content: code,
                         });
+                        successful = true;
                         break;
-                    } else {
-                        Err(MdParseError::from_line(
-                            j + 1,
-                            "```",
-                            format!("```{}", remaining),
-                        ))?;
                     }
+                    Err(MdParseError::from_line(
+                        j + 1,
+                        "```",
+                        format!("```{remaining}"),
+                    ))?;
                 } else {
                     code.push_str(line);
                     code.push('\n');
                 }
             }
+            if successful {
+                continue;
+            }
             Err(MdParseError::from_line(i + 1, "a terminating '```'", ""))?;
         }
 
         // lists TODO
+
+        // paragraph
+        blocks.push(Block::Paragraph(
+            parse_inlines(line).map_err(|e| e.set_line(i + 1))?,
+        ));
     }
 
     Ok(blocks)

@@ -1,3 +1,5 @@
+//! Simple and program specific command line argument parsing solution.
+
 use std::path::PathBuf;
 
 use crate::error::Error;

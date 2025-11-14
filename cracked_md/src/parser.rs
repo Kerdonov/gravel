@@ -1,3 +1,5 @@
+//! Parse "Markdown" to AST.
+
 mod block;
 mod inline;
 
@@ -5,13 +7,15 @@ use block::parse_blocks;
 
 use crate::{MdParseError, ast::Document};
 
+/// Parses the incoming data to a Markdown abstract syntax tree.
+/// # Errors
+/// This function will return an `MdParseError` when any part of the input is invalid Markdown.
 pub fn parse(s: &str) -> Result<Document, MdParseError> {
     Ok(Document {
         blocks: parse_blocks(s)?,
     })
 }
 
-/*
 #[cfg(test)]
 mod test {
     use crate::ast::*;
@@ -21,7 +25,7 @@ mod test {
     fn only_paragraph() {
         let md = "testing paragraph";
 
-        let doc = parse(md);
+        let doc = parse(md).unwrap();
         assert_eq!(
             doc,
             Document {
@@ -36,7 +40,7 @@ mod test {
     fn different_headers() {
         let md = "# Header 1\n## Header 2";
 
-        let doc = parse(md);
+        let doc = parse(md).unwrap();
 
         assert_eq!(
             doc,
@@ -59,7 +63,7 @@ mod test {
     fn inline_bold_and_italics() {
         let md = "some *bold* and _italic_ text";
 
-        let doc = parse(md);
+        let doc = parse(md).unwrap();
 
         assert_eq!(
             doc,
@@ -79,7 +83,7 @@ mod test {
     fn inline_code() {
         let md = "run command `sudo rm -rf /`";
 
-        let doc = parse(md);
+        let doc = parse(md).unwrap();
 
         assert_eq!(
             doc,
@@ -96,7 +100,7 @@ mod test {
     fn bold_header() {
         let md = "# Header is *bold*";
 
-        let doc = parse(md);
+        let doc = parse(md).unwrap();
 
         assert_eq!(
             doc,
@@ -116,7 +120,7 @@ mod test {
     fn anonymous_code_block() {
         let md = "```\necho hello\n```";
 
-        let doc = parse(md);
+        let doc = parse(md).unwrap();
 
         assert_eq!(
             doc,
@@ -133,7 +137,7 @@ mod test {
     fn rust_code_block() {
         let md = "```rust\nfn main() {\n\tprintln!(\"Hello world!\");\n}\n```";
 
-        let doc = parse(md);
+        let doc = parse(md).unwrap();
 
         assert_eq!(
             doc,

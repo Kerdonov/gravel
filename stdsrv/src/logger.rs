@@ -24,6 +24,9 @@ impl Display for Level {
     }
 }
 
+/// A logging macro. Takes a [`Level`] and a formatted string.
+///
+/// [`Level`]: ./logger/enum.Level.html
 #[macro_export]
 macro_rules! log {
     ($level:expr, $($arg:tt)*) => {{

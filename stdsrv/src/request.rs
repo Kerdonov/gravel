@@ -32,7 +32,7 @@ impl TryFrom<&str> for HttpMethod {
 
 impl Display for HttpMethod {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -154,7 +154,7 @@ impl TryFrom<&str> for HttpRequest {
 
         for line in lines {
             if let Some(v) = line.split_once(": ") {
-                headers.add(v.0, v.1)
+                headers.add(v.0, v.1);
             }
         }
 
