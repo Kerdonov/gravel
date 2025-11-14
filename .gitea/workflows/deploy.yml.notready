@@ -1,0 +1,32 @@
+name: Build and deploy Docker image
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: rust-latest
+
+    steps:
+      - run: apt-get update -y && apt-get install nodejs -y
+      - uses: actions/checkout@v4
+      - run: cargo build --release
+      - uses: docker/setup-buildx-action@v3
+        with:
+          config-inline: |
+            [registry."gitea-http.apps.svc.cluster.local:3000"]
+              http = true
+              insecure = true
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: "gitea-http.apps.svc.cluster.local:3000".....
+
