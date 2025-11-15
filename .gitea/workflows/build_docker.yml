@@ -1,0 +1,16 @@
+name: Build and push Docker image
+
+env:
+  CARGO_COLOR_TERM: always
+
+on:
+  push:
+    branches: ["master", "dev"]
+
+
+jobs:
+  build:
+    runs-on: kubernetes
+
+    steps:
+      - run: echo "what this wasn't a hallucination!!!"
