@@ -119,7 +119,9 @@ impl HttpResponse {
         let _ = std::io::Read::read(stream, &mut [0u8; 1]);
         */
 
-        log!(Level::Info, "\n{}", &self);
+        // todo better verbose tracking
+        log!(Level::Info, "{} {}", self.version, self.status);
+        log!(Level::Debug, "\n{}", &self);
         Ok(())
     }
 

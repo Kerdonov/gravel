@@ -1,7 +1,7 @@
 //! A "Markdown" parser and HTML generator. Part of a static site generator `marksmith-rs`.
 //! Not following any standards, only vibes.
 
-#![deny(unused_imports)]
+#![deny(dead_code, unused_imports)]
 #![allow(clippy::needless_pass_by_value)]
 
 use fstools::crawl_fs;
@@ -107,6 +107,7 @@ pub enum Error {
     InDirIsNotDir,
     OutDirIsNotEmpty,
     OutDirIsNotDir,
+    OutDirFileOverwriteWithoutForce,
     OutDirFileDeleteNotAllowed,
     OutDirDirectoryInPlaceOfFile,
     FileRead,
@@ -162,8 +163,12 @@ pub fn generate(indir: &PathBuf, outdir: &PathBuf, force: bool) -> Result<()> {
         // check if path exists
         if newpath.exists() {
             // remove if is file and if force, otherwise error
-            if newpath.is_file() && force {
-                fs::remove_file(&newpath).map_err(|_e| Error::OutDirFileDeleteNotAllowed)?;
+            if newpath.is_file() {
+                if force {
+                    fs::remove_file(&newpath).map_err(|_e| Error::OutDirFileDeleteNotAllowed)?;
+                } else {
+                    Err(Error::OutDirFileOverwriteWithoutForce)?;
+                }
             } else {
                 Err(Error::OutDirDirectoryInPlaceOfFile)?;
             }

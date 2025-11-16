@@ -1,10 +1,11 @@
 //! Simple and program specific command line argument parsing solution.
 
-use std::path::PathBuf;
-
 use crate::error::Error;
-
 use crate::error::ErrorKind;
+use std::path::PathBuf;
+use std::sync::OnceLock;
+
+pub static VERBOSE: OnceLock<bool> = OnceLock::new();
 
 pub struct ProgramArgs {
     pub outdir: PathBuf,
@@ -12,6 +13,7 @@ pub struct ProgramArgs {
     pub generate: bool,
     pub force: bool,
     pub addr: String,
+    pub verbose: bool,
 }
 
 impl Default for ProgramArgs {
@@ -22,6 +24,7 @@ impl Default for ProgramArgs {
             generate: false,
             force: false,
             addr: "0.0.0.0:8080".to_string(),
+            verbose: false,
         }
     }
 }
@@ -50,11 +53,16 @@ impl TryFrom<std::env::Args> for ProgramArgs {
                 }
                 "-g" => a.generate = true,
                 "-f" => a.force = true,
+                "-v" => {
+                    a.verbose = true;
+                    VERBOSE.get_or_init(|| true);
+                }
                 _ => {
                     a.outdir = v.into();
                 }
             }
         }
+        VERBOSE.get_or_init(|| false);
         Ok(a)
     }
 }

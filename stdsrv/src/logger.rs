@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 #[derive(Debug)]
 #[allow(dead_code)]
+#[derive(PartialEq)]
 pub enum Level {
     Error,
     Warn,
@@ -30,13 +31,15 @@ impl Display for Level {
 #[macro_export]
 macro_rules! log {
     ($level:expr, $($arg:tt)*) => {{
-        println!(
-            "{} {}:{}:{}: {}",
-            $level,
-            std::module_path!(),
-            std::file!(),
-            std::line!(),
-            format!($($arg)*)
-        );
+        if $level != Level::Debug || crate::args::VERBOSE.get().unwrap().to_owned() {
+            println!(
+                "{} {}:{}:{}: {}",
+                $level,
+                std::module_path!(),
+                std::file!(),
+                std::line!(),
+                format!($($arg)*)
+            );
+        }
     }};
 }
