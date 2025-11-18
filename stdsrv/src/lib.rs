@@ -1,31 +1,36 @@
 //! A simple web server with 0 dependencies (other than Rust's stdlib).
-//! Documentation is a work in progress, go see my webpage at [jlux.dev](https://jlux.dev).
+
+#![feature(never_type)]
+#![allow(dead_code)]
 
 use std::{
     io::{BufReader, BufWriter},
-    net::TcpListener,
-    process,
+    net::{Ipv4Addr, TcpListener},
+    path::PathBuf,
 };
 
-use args::ProgramArgs;
-use cracked_md::generate;
+use error::Error;
 use fileserver::FileServer;
-use logger::Level;
 use request::HttpRequest;
 use responder::Responder;
+use slogger::{Level, log};
 
-mod args;
-mod error;
+pub mod error;
 mod fileserver;
 mod http_header;
-//mod http_stream;
-mod logger;
 mod request;
 mod responder;
 mod response;
 
-/// Entrypoint to the program.
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// Opens a file server on a specified address and port which serves all files in dir.
+///
+/// # Errors
+/// Errors that come up while serving files. Look at [`Error`].
+///
+/// # Panics
+/// Never. Added to allow compiler to check for ! type.
+pub fn serve(addr: Ipv4Addr, port: u16, dir: PathBuf) -> Result<!, Error> {
+    /*
     let args: ProgramArgs = std::env::args().try_into()?;
 
     if args.generate {
@@ -51,18 +56,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    let listener = TcpListener::bind(&args.addr)?;
-    log!(Level::Info, "Listening on addr `{}`", &args.addr);
+    */
+    let listener = TcpListener::bind((addr, port))?;
+    log!(Level::Info, "Listening on addr `{}:{}`", addr, port);
 
+    // todo: refactor this
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                let outdir = args.outdir.clone();
+                let outdir = dir.clone();
                 std::thread::spawn(move || {
                     log!(Level::Debug, "TcpStream handler spawned");
                     let mut reader = BufReader::new(&stream);
                     let mut writer = BufWriter::new(&stream);
-                    let server = match FileServer::new(&outdir) {
+                    let server = match FileServer::new(outdir.as_path()) {
                         Ok(s) => s,
                         Err(_e) => return,
                     };
@@ -82,5 +89,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    Ok(())
+    panic!("Code shouldn't get to here");
 }

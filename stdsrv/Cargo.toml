@@ -3,11 +3,7 @@ name = "stdsrv"
 version = "0.1.0"
 edition = "2024"
 
-[[bin]]
-name = "gravel"
-path = "src/main.rs"
-
 # local dependencies
 [dependencies]
-cracked_md = { path = "../cracked_md" }
 fstools = { path = "../fstools" }
+slogger = { path = "../slogger" }

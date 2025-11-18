@@ -27,6 +27,7 @@ pub struct Error {
 }
 
 impl Error {
+    #[must_use]
     pub fn new(kind: ErrorKind, msg: &str) -> Self {
         Self {
             kind,

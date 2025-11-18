@@ -2,8 +2,7 @@
 
 use crate::error::Result;
 use crate::http_header::HttpHeaders;
-use crate::log;
-use crate::logger::Level;
+use slogger::{Level, log};
 use std::{fmt::Display, io::Write};
 
 /// Macro for generating Http status codes (AI generated).

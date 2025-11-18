@@ -2,8 +2,7 @@
 
 use crate::error::{Error, ErrorKind, Result};
 use crate::http_header::HttpHeaders;
-use crate::log;
-use crate::logger::Level;
+use slogger::{Level, log};
 use std::fmt::Display;
 use std::io::{BufRead, BufReader};
 use std::net::TcpStream;

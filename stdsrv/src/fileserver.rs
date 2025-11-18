@@ -1,8 +1,8 @@
 //! A simple server implementation that just responds with the contents of the file requested in
 //! the provided directory.
 
-use std::fs;
 use std::path::PathBuf;
+use std::{fs, path::Path};
 
 use crate::{
     error::{Error, ErrorKind, Result},
@@ -16,7 +16,7 @@ pub struct FileServer {
 }
 
 impl FileServer {
-    pub fn new(root: &PathBuf) -> Result<FileServer> {
+    pub fn new(root: &Path) -> Result<FileServer> {
         if !root.is_dir() {
             return Err(Error::new(
                 ErrorKind::DirNotFound,

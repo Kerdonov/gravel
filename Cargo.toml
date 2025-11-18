@@ -3,6 +3,7 @@ members = [
   "stdsrv",
   "cracked_md",
   "fstools",
+  "gravel_cli", "slogger",
 ]
 
 resolver = "3"

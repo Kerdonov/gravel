@@ -1,8 +1,9 @@
-use std::fmt::Display;
+use std::{fmt::Display, sync::OnceLock};
 
-#[derive(Debug)]
+pub static LOG_LEVEL: OnceLock<Level> = OnceLock::new();
+
 #[allow(dead_code)]
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Level {
     Error,
     Warn,
@@ -26,12 +27,10 @@ impl Display for Level {
 }
 
 /// A logging macro. Takes a [`Level`] and a formatted string.
-///
-/// [`Level`]: ./logger/enum.Level.html
 #[macro_export]
 macro_rules! log {
     ($level:expr, $($arg:tt)*) => {{
-        if $level != Level::Debug || crate::args::VERBOSE.get().unwrap().to_owned() {
+        if &$level <= $crate::LOG_LEVEL.get().unwrap_or(&$crate::Level::Info) {
             println!(
                 "{} {}:{}:{}: {}",
                 $level,
@@ -43,3 +42,5 @@ macro_rules! log {
         }
     }};
 }
+
+// todo: implement clean verbose/short logging

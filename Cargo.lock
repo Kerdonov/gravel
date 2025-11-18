@@ -14,9 +14,22 @@ name = "fstools"
 version = "0.1.0"
 
 [[package]]
-name = "stdsrv"
+name = "gravel_cli"
 version = "0.1.0"
 dependencies = [
  "cracked_md",
+ "slogger",
+ "stdsrv",
+]
+
+[[package]]
+name = "slogger"
+version = "0.1.0"
+
+[[package]]
+name = "stdsrv"
+version = "0.1.0"
+dependencies = [
  "fstools",
+ "slogger",
 ]
