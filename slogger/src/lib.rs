@@ -30,13 +30,16 @@ impl Display for Level {
 #[macro_export]
 macro_rules! log {
     ($level:expr, $($arg:tt)*) => {{
+        let log_from = if &$level == &$crate::Level::Debug {
+            format!(" {}:{}", std::file!(), std::line!())
+        } else {
+            String::new()
+        };
         if &$level <= $crate::LOG_LEVEL.get().unwrap_or(&$crate::Level::Info) {
             println!(
-                "{} {}:{}:{}: {}",
+                "{}{}: {}",
                 $level,
-                std::module_path!(),
-                std::file!(),
-                std::line!(),
+                log_from,
                 format!($($arg)*)
             );
         }

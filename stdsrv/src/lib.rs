@@ -29,7 +29,7 @@ mod response;
 ///
 /// # Panics
 /// Never. Added to allow compiler to check for ! type.
-pub fn serve(addr: Ipv4Addr, port: u16, dir: PathBuf) -> Result<!, Error> {
+pub fn serve(addr: Ipv4Addr, port: u16, dir: PathBuf) -> Result<(), Error> {
     /*
     let args: ProgramArgs = std::env::args().try_into()?;
 
@@ -88,6 +88,5 @@ pub fn serve(addr: Ipv4Addr, port: u16, dir: PathBuf) -> Result<!, Error> {
             Err(e) => log!(Level::Warn, "Connection failed: {}", e),
         }
     }
-
-    panic!("Code shouldn't get to here");
+    Ok(())
 }

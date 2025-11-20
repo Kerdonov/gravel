@@ -6,11 +6,13 @@
 
 use fstools::crawl_fs;
 use parser::parse;
+use slogger::{Level, log};
 use std::{
     fmt::Display,
     fs::{self, File},
     io::Write,
     path::PathBuf,
+    time::Instant,
 };
 use to_html::ToHtml;
 
@@ -104,17 +106,7 @@ impl std::error::Error for MdParseError {}
 
 #[derive(Debug)]
 pub enum Error {
-    InDirIsNotDir,
-    OutDirIsNotEmpty,
-    OutDirIsNotDir,
-    OutDirFileOverwriteWithoutForce,
-    OutDirFileDeleteNotAllowed,
-    OutDirDirectoryInPlaceOfFile,
-    FileRead,
-    DirRead,
-    FileWrite,
-    FileCreate,
-    DirCreate,
+    FSError(String),
     Parse(MdParseError),
 }
 
@@ -140,11 +132,14 @@ type Result<T> = std::result::Result<T, crate::Error>;
 /// # Errors
 /// Anything wrong with reading files from the directories or parsing the files.
 pub fn generate(indir: &PathBuf, outdir: &PathBuf, force: bool) -> Result<()> {
+    let start_time = Instant::now();
+    let mut generated_files = 0;
+
     if !indir.is_dir() {
-        Err(Error::InDirIsNotDir)?;
+        Err(Error::FSError("In directory not found".to_string()))?;
     }
     if !outdir.is_dir() {
-        Err(Error::OutDirIsNotDir)?;
+        Err(Error::FSError("Out directory not found".to_string()))?;
     }
     let files = crawl_fs(indir);
 
@@ -152,12 +147,13 @@ pub fn generate(indir: &PathBuf, outdir: &PathBuf, force: bool) -> Result<()> {
         let fullpath = indir.as_path().join(&path);
 
         // read and parse md file
-        let content = fs::read_to_string(&fullpath).map_err(|_e| Error::FileRead)?;
+        let content = fs::read_to_string(&fullpath)
+            .map_err(|_e| Error::FSError(format!("File `{}` read error", path.display())))?;
         let html = parse(&content)?.to_html();
 
         // write html data to file
         let mut newpath = outdir.to_owned();
-        newpath.push(path);
+        newpath.push(&path);
         newpath.set_extension("html");
 
         // check if path exists
@@ -165,25 +161,61 @@ pub fn generate(indir: &PathBuf, outdir: &PathBuf, force: bool) -> Result<()> {
             // remove if is file and if force, otherwise error
             if newpath.is_file() {
                 if force {
-                    fs::remove_file(&newpath).map_err(|_e| Error::OutDirFileDeleteNotAllowed)?;
+                    fs::remove_file(&newpath).map_err(|_e| {
+                        Error::FSError(format!("File `{}` deleting not allowed", newpath.display()))
+                    })?;
                 } else {
-                    Err(Error::OutDirFileOverwriteWithoutForce)?;
+                    Err(Error::FSError(
+                        "File overwrite denied, enable force overwrite".to_string(),
+                    ))?;
                 }
             } else {
-                Err(Error::OutDirDirectoryInPlaceOfFile)?;
+                Err(Error::FSError(format!(
+                    "Directory `{}` in place of file in out directory",
+                    newpath.display()
+                )))?;
             }
         }
 
         //println!("About to write file '{}'", newpath.display());
 
-        let parent = newpath.parent().ok_or(Error::DirCreate)?;
-        fs::create_dir_all(parent).map_err(|_e| Error::DirCreate)?;
-        let mut newfile = File::create_new(newpath).map_err(|_e| Error::FileCreate)?;
+        let parent = newpath.parent().ok_or(Error::FSError(format!(
+            "Access to parent directory of `{}` denied",
+            newpath.display()
+        )))?;
+        fs::create_dir_all(parent)
+            .map_err(|_e| Error::FSError("Creating directory tree failed".to_string()))?;
+        let mut newfile = File::create_new(&newpath).map_err(|_e| {
+            Error::FSError(format!("Creating file `{}` failed", &newpath.display()))
+        })?;
 
-        newfile
-            .write(html.as_bytes())
-            .map_err(|_e| Error::FileWrite)?;
+        newfile.write(html.as_bytes()).map_err(|_e| {
+            Error::FSError(format!("Writing to file `{}` failed", newpath.display()))
+        })?;
+
+        log!(
+            Level::Debug,
+            "File `{}` generation to `{}` successful",
+            path.display(),
+            newpath.display()
+        );
+        generated_files += 1;
     }
+
+    let time = start_time.elapsed();
+
+    let time_report = if time.as_micros() < 10000 {
+        format!("{} μs", time.as_micros())
+    } else {
+        format!("{} ms", time.as_millis())
+    };
+
+    log!(
+        Level::Info,
+        "Generated {} files in {} without reported errors",
+        generated_files,
+        time_report
+    );
 
     Ok(())
 }

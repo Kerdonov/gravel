@@ -110,6 +110,14 @@ impl TryFrom<&mut BufReader<&TcpStream>> for HttpRequest {
             }
         }
 
+        log!(
+            Level::Info,
+            "{} /{} {}",
+            req.method,
+            req.path.display(),
+            req.version
+        );
+
         Ok(req)
     }
 }
