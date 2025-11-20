@@ -1,5 +1,5 @@
 {
-  description = "stdsrv Flake file";
+  description = "gravel project flake";
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
@@ -14,16 +14,17 @@
     flake-utlis.lib.eachDefaultSystem (
       system: let
         pkgs = import nixpkgs {inherit system;};
-        stdsrv = import ./package.nix {inherit pkgs;};
+        gravel = import ./package.nix {inherit pkgs;};
       in {
-        packages.default = stdsrv;
+        packages.default = gravel;
         devShells.default = pkgs.mkShell {
-          packages = [
-            pkgs.rustup
-            pkgs.bacon
-            pkgs.cargo-nextest
-            pkgs.cargo-expand
-            pkgs.cargo-watch
+          packages = with pkgs; [
+            rustup
+            helix
+            bacon
+            cargo-nextest
+            cargo-expand
+            cargo-watch
           ];
         };
       }

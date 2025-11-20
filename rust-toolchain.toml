@@ -5,5 +5,6 @@ targets = [
 ]
 components = [
   "clippy",
-  "rustfmt"
+  "rustfmt",
+  "rust-analyzer"
 ]

@@ -3,7 +3,6 @@
 use args::ProgramArgs;
 use cracked_md::generate;
 use error::Error;
-//use slogger::{LOG_LEVEL, Level};
 use stdsrv::serve;
 
 mod args;
