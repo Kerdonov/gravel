@@ -134,6 +134,20 @@ mod test {
     }
 
     #[test]
+    fn code_block_content_after_end() {
+        let md = "```\necho hello\n```abc";
+        let doc_res = parse(md);
+        assert!(doc_res.is_err());
+    }
+
+    #[test]
+    fn code_block_no_terminating() {
+        let md = "```\nabc\n";
+        let doc_res = parse(md);
+        assert!(doc_res.is_err());
+    }
+
+    #[test]
     fn rust_code_block() {
         let md = "```rust\nfn main() {\n\tprintln!(\"Hello world!\");\n}\n```";
 

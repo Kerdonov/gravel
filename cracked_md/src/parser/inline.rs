@@ -69,7 +69,14 @@ fn collect_until<I: Iterator<Item = char>>(
 mod test {
     use crate::ast::Inline;
 
-    use super::parse_inlines;
+    use super::{collect_until, parse_inlines};
+
+    #[test]
+    fn collect_until_without_end() {
+        let mut s = "abcdef".chars().peekable();
+        let res = collect_until(&mut s, '.');
+        assert!(res.is_err());
+    }
 
     #[test]
     fn bold_text() {
@@ -127,5 +134,27 @@ mod test {
                 Inline::Text(" on your computer".to_string())
             ]
         );
+    }
+
+    #[test]
+    fn single_hyperlink() {
+        let md = "[my site](https://example.com)";
+        let inl = parse_inlines(md).unwrap();
+
+        assert_eq!(
+            inl,
+            vec![Inline::Link {
+                text: vec![Inline::Text("my site".to_string())],
+                href: "https://example.com".to_string()
+            }]
+        );
+    }
+
+    #[test]
+    fn hyperlink_without_link() {
+        let md = "[abc]";
+        let inl = parse_inlines(md);
+
+        assert!(inl.is_err());
     }
 }

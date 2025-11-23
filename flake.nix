@@ -25,6 +25,7 @@
             cargo-nextest
             cargo-expand
             cargo-watch
+            cargo-tarpaulin
           ];
         };
       }
