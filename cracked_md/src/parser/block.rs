@@ -48,6 +48,11 @@ pub fn parse_blocks(input: &str) -> Result<Vec<Block>, MdParseError> {
         }
         */
 
+        // unordered list TODO
+        if line_chars.parse_str("- ") {
+            todo!()
+        }
+
         // code
         if line_chars.parse_str("```") {
             let lang_line: String = line_chars.collect();

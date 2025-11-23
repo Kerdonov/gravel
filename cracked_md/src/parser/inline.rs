@@ -36,12 +36,18 @@ pub fn parse_inlines(input: &str) -> Result<Vec<Inline>, MdParseError> {
             _ => {
                 let mut text = String::new();
                 text.push(c);
+                let mut escaped = false;
                 while let Some(&nc) = chars.peek() {
-                    if matches!(nc, '*' | '_' | '`' | '[') {
+                    if matches!(nc, '*' | '_' | '`' | '[') && !escaped {
                         break;
                     }
-                    let c = chars.next().ok_or(MdParseError::new("a character", ""))?;
-                    text.push(c);
+                    let next_c = chars.next().ok_or(MdParseError::new("a character", ""))?;
+                    if next_c == '\\' && !escaped {
+                        escaped = true;
+                    } else {
+                        escaped = false;
+                        text.push(next_c);
+                    }
                 }
                 inlines.push(Inline::Text(text));
             }
@@ -138,15 +144,18 @@ mod test {
 
     #[test]
     fn single_hyperlink() {
-        let md = "[my site](https://example.com)";
+        let md = "a link to [my site](https://example.com)";
         let inl = parse_inlines(md).unwrap();
 
         assert_eq!(
             inl,
-            vec![Inline::Link {
-                text: vec![Inline::Text("my site".to_string())],
-                href: "https://example.com".to_string()
-            }]
+            vec![
+                Inline::Text("a link to ".to_string()),
+                Inline::Link {
+                    text: vec![Inline::Text("my site".to_string())],
+                    href: "https://example.com".to_string()
+                }
+            ]
         );
     }
 
@@ -156,5 +165,19 @@ mod test {
         let inl = parse_inlines(md);
 
         assert!(inl.is_err());
+    }
+
+    #[test]
+    fn escape_brackets() {
+        let md = r"some \[text\]";
+        let inl = parse_inlines(md).unwrap();
+        assert_eq!(inl, vec![Inline::Text("some [text]".to_string())]);
+    }
+
+    #[test]
+    fn escape_escape() {
+        let md = r"backslash \\";
+        let inl = parse_inlines(md).unwrap();
+        assert_eq!(inl, vec![Inline::Text(r"backslash \".to_string())]);
     }
 }

@@ -16,13 +16,8 @@ pub enum Block {
         language: Option<String>,
         content: String,
     },
-    List(Vec<ListItem>),
+    List(Vec<Block>),
     Quote(Vec<Block>),
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct ListItem {
-    pub blocks: Vec<Block>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
