@@ -10,14 +10,17 @@ use std::net::Ipv4Addr;
 use std::path::{Path, PathBuf};
 
 pub enum Command {
-    Generate { force: bool },
+    Generate { force: bool, single: bool },
     Serve { addr: Ipv4Addr, port: u16 },
     Init,
 }
 
 impl Default for Command {
     fn default() -> Self {
-        Self::Generate { force: true }
+        Self::Generate {
+            force: true,
+            single: false,
+        }
     }
 }
 
@@ -67,10 +70,18 @@ impl TryFrom<Args> for Command {
             comm = Command::Init;
         }
         // `gravel` command
-        else if let Some(a) = value.next() {
-            Err(Error::CommandLineArgsParse(format!(
-                "Unexpected argument: `{a}`"
-            )))?;
+        for a in value {
+            match a.as_str() {
+                "-s" => {
+                    comm = Command::Generate {
+                        force: true,
+                        single: true,
+                    }
+                }
+                _ => Err(Error::CommandLineArgsParse(format!(
+                    "Unknown argument: `{a}`"
+                )))?,
+            }
         }
 
         Ok(comm)

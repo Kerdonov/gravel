@@ -15,9 +15,16 @@ fn run() -> Result<(), Error> {
     let conf = ProgramConfig::new("gravel.toml", std::env::args())?;
 
     match conf.command {
-        Command::Init => todo!("project init not implemented"),
+        Command::Init => todo!("project init"),
         Command::Serve { addr, port } => serve(addr, port, conf.outdir)?,
-        Command::Generate { force } => generate(&conf.indir, &conf.outdir, force)?,
+        Command::Generate {
+            force,
+            single: false,
+        } => generate(&conf.indir, &conf.outdir, force)?,
+        Command::Generate {
+            force: _f,
+            single: true,
+        } => todo!("single file generation"),
     }
     Ok(())
 }
