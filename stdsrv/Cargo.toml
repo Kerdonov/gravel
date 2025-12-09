@@ -9,5 +9,5 @@ path = "src/main.rs"
 
 # local dependencies
 [dependencies]
-cracked_md = { path = "../cracked_md" }
-fstools = { path = "../fstools" }
+cracked_md = { version = "0.1.0", path = "../cracked_md" }
+fstools = { version = "0.1.0", path = "../fstools" }
