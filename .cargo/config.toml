@@ -1,0 +1,5 @@
+[registry]
+default = "gitea"
+
+[registries.gitea]
+index = "sparse+https://git.jlux.dev/api/packages/scrac/cargo/"

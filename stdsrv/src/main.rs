@@ -28,6 +28,7 @@ mod response;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: ProgramArgs = std::env::args().try_into()?;
 
+
     if args.generate {
         match generate(&args.indir, &args.outdir, args.force) {
             Ok(()) => log!(

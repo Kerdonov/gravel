@@ -3,3 +3,4 @@ web/
 target/
 
 result
+.cargo/credentials.toml
